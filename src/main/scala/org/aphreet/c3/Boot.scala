@@ -34,6 +34,7 @@ import snippet.groups.GroupsSection
 import snippet.logging.LogLevel
 import snippet.notifications.NotificationsSection
 import snippet.users.UsersSection
+import org.aphreet.c3.snippet.knowledge_base.KnowledgeBaseSection
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -41,7 +42,7 @@ import snippet.users.UsersSection
  */
 class Boot extends Bootable {
   private val sections: List[Section] =
-    List(BaseSection, UsersSection, GroupsSection, CategoriesSection, NotificationsSection, ApproveSection)
+    List(BaseSection, UsersSection, GroupsSection, CategoriesSection, NotificationsSection, ApproveSection, KnowledgeBaseSection)
 
   import Boot._
 
@@ -112,7 +113,7 @@ class Boot extends Bootable {
 
       Menu("R service") / "r_suite" >> LocGroup("mainmenu"),
 
-      Menu("Knowledge base") / "k_base" >> LocGroup("mainmenu"),
+      Menu("Knowledge Base") / "k_base" >> LocGroup("mainmenu"),
 
       LogLevel.menu, // default log level menu is located at /loglevel/change
 
