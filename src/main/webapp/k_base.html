@@ -3,16 +3,16 @@
     </div>
     <div class="lift:bind-at?name=content">
         <div class="lift:KnowledgeBaseListPage.list">
-            <a type="button" href="#add_knowledge" class="btn btn_add_user" data-toggle="modal" title="Add knowledge">
+            <a id="add-knowledge-btn" type="button" href="#add_knowledge" class="btn btn_add_user" data-toggle="modal" title="Add knowledge">
                 <strong>New Knowledge</strong>
             </a>
 
-            <div class="modal hide fade" id="add_group">
+            <div class="modal hide fade" id="add_knowledge">
                 <div class="modal-content">
                     <h4 class="modal-header">Create knowledge</h4>
 
                     <div class="modal-body">
-                        <form id="add_group_form">
+                        <form id="add-knowledge-form" method="post">
                             <fieldset>
                                 <table class="table table-striped table_ul">
                                     <colgroup>
@@ -21,65 +21,64 @@
                                         <col style="width: 10%">
                                     </colgroup>
                                     <tbody class="t_tbody">
-                                    <tr >
+                                    <tr>
                                         <td><i class="icon-font"></i> Name <span style="color: red;">*</span></td>
-                                        <td >
+                                        <td>
                                             <input class="input_box input-xlarge" type="text" name="name" required
-                                                   placeholder="Group name">
+                                                   placeholder="Name">
                                         </td>
                                     </tr>
-                                    <tr >
-                                        <td ><i class="icon-globe"></i> Public</td>
-                                        <td >
-                                            <input name="public" type="checkbox" value="true"/>
-                                            <span class="description_group description_group_settings">Make group public</span>
+                                    <tr>
+                                        <td><i class="icon-font"></i> Resource <span style="color: red;">*</span></td>
+                                        <td>
+                                            <input class="input_box input-xlarge"
+                                                   type="text"
+                                                   name="resource"
+                                                   required
+                                                   placeholder="Resource">
                                         </td>
                                     </tr>
-                                    <tr >
+                                    <tr>
                                         <td><i class="icon-info-sign"></i> Description <span
                                                 style="color: red;">*</span></td>
-                                        <td >
-                                            <textarea class="description input_box" cols="500" rows="2" type="text"
+                                        <td>
+                                            <textarea class="description input_box" cols="500" rows="2"
                                                       name="description" required
-                                                      placeholder="Group description"></textarea>
+                                                      placeholder="Description"></textarea>
                                         </td>
                                     </tr>
-                                    <tr >
-                                        <td class="tags"><i class="icon-tags"></i> Tags</td>
-                                        <td><input class="input_box current_tags input-xlarge" type="text" name="tags_edit" required placeholder="docs, main, etc..." ></td>
-                                    </tr>
+
                                     </tbody>
                                 </table>
                             </fieldset>
                         </form>
                     </div>
-                </div> <!-- modal-content-->
+                </div>
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-warning cancel">
                         <i class="icon-ban-circle icon-white"></i>
                         <span>Cancel</span>
                     </button>
-                    <button type="submit" class="btn btn-success" form="add_group_form">
+                    <button type="submit" class="btn btn-success" form="add-knowledge-form">
                         <i class="icon-white icon-upload"></i>
                         <span>Create</span>
                     </button>
                 </div>
-            </div> <!-- add_group-->
+            </div>
+            <!-- add_group-->
             <div class="container_k_unit">
                 <hr class="hr_groups_list"/>
                 <h4>
                     <script type="text/javascript">
-                        function HideGroupDetails(that)
-                        {
+                        function HideGroupDetails(that) {
                             var panel = $(that).parent().parent().children('.desc_panel');
                             var btn = $(that);
 
-                            if ((panel).css('height')=='25px')
-                            {
-                                (panel).css('height','auto')
+                            if ((panel).css('height') == '25px') {
+                                (panel).css('height', 'auto')
                                 btn.attr("class", "toggle_switch inf_right icon-chevron-up");
                             } else {
-                                (panel).css('height','25px')
+                                (panel).css('height', '25px')
                                 btn.attr("class", "toggle_switch inf_right icon-chevron-down");
                             }
                         }
@@ -87,10 +86,16 @@
                     <img class="inf_left_groups" src="/images/glyphicons_203_lock.png"/>
                     <a href="#" class="name"></a>
                     <span class="toggle_switch inf_right icon-chevron-down" onclick="HideGroupDetails(this);"></span>
-                    <span class="icon-cog cog inf_right"></span>
-                    <span class="icon-plus plus inf_right"></span>
-                    <!-- Notification count will be here! <span class="bange event inf_right" style="font-size:14px;">8</span>-->
                 </h4>
+                <div class="desc_panel">
+                    <p class="knowledge_description">Description....</p>
+
+                    <div class="info_group">
+                        <p class="knowledge_owner pull-right">Owner....</p>
+                        <i class="icon-user pull-right"
+                           style="margin-right: 3px; margin-left: 3px; margin-top: 3px;"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

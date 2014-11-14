@@ -15,7 +15,7 @@ class KnowledgeUnit extends LongKeyedMapper[KnowledgeUnit] with IdPK with ManyTo
     override def validations = nonEmpty _ :: isUnique _ :: Nil
 
     def isUnique(s: String): List[FieldError] = {
-      if (!KnowledgeItem.find(Cmp(KnowledgeItem.name, OprEnum.Eql, Full(s.toLowerCase), None, Full("LOWER"))).isEmpty)
+      if (!KnowledgeUnit.find(Cmp(KnowledgeUnit.name, OprEnum.Eql, Full(s.toLowerCase), None, Full("LOWER"))).isEmpty)
         List(FieldError(this, "KnowledgeItem with name " + s + " already exists"))
       else Nil
     }
