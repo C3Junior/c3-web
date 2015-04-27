@@ -15,6 +15,7 @@ import net.liftweb.mapper._
 import net.liftweb.sitemap.Loc.{If, LocGroup, _}
 import net.liftweb.sitemap._
 import net.liftweb.util.{Props, _}
+import org.aphreet.c3.api.Rest
 import org.aphreet.c3.model._
 import org.aphreet.c3.snippet.approve.ApproveSection
 import org.aphreet.c3.snippet.categories.CategoriesSection
@@ -216,6 +217,9 @@ class Boot extends Bootable {
     LiftRules.statelessDispatch.prepend {
       case _ if DB.currentConnection.isEmpty => () => Full(ServiceUnavailableResponse(10))
     }
+
+    LiftRules.dispatch.append(Rest)
+    LiftRules.statelessDispatch.append(Rest)
 
     S.addAround(DB.buildLoanWrapper())
   }
