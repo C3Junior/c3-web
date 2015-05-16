@@ -59,19 +59,13 @@ class GroupListPage extends GroupsAccess {
 
   def list = {
 
-    val tab = getTabParameter()
+    val tab = getTab()
     val groupList = User.currentUser match {
-      case Full(u) =>
-        tab match {
-          case MyOwnGroupsParameter => Group.findAll(By(Group.owner, u))
-          case MyGroupsParameter => u.groups.toList
-          case _ => if (u.superUser.is) Group.findAll().toList
-          else u.groups.toList ::: Group.findAll(By(Group.isOpen, true))
-        }
+      case Full(u) => tab.getGroups(u)
       case Empty => Group.findAll(By(Group.isOpen, true))
     }
 
-    pageHeader(User.currentUser, tab) &
+    pageHeader(User.currentUser) &
       (User.currentUser match {
         case Full(u) => "#add_group" #> addGroup()
         case Empty =>
@@ -150,22 +144,26 @@ class GroupListPage extends GroupsAccess {
       }
   }
 
-  private def pageHeader(currentUser: Box[User], tab: String) = {
+  private def pageHeader(currentUser: Box[User]) = {
+    val tab = getTab()
     "#header *" #> (
       currentUser match {
-        case Full(u) => (
-          tab match {
-            case MyGroupsParameter => "My Groups"
-            case MyOwnGroupsParameter => "My Own Groups"
-            case _ => "All Groups"
-          })
+        case Full(u) => tab.header
         case Empty => "All Groups"
       })
   }
+  private def getTab(): GroupTab = {
+    def getTabParameter(): String = S.param("tab") openOr MyGroupsParameter
 
-  private def getTabParameter():String = S.param("tab") openOr MyGroupsParameter
+    val tab = getTabParameter()
+    tab match {
+      case MyGroupsParameter => MyGroupsTab()
+      case MyOwnGroupsParameter => MyOwnGroupTab()
+      case _ => AllTab()
+    }
+  }
 
-  def newGroupAndUser() : CssSel={
+  def newGroupAndUser(): CssSel = {
     ///todo need refactoring
     val newUser = User.create
     var newGroup = Group.create
@@ -173,7 +171,8 @@ class GroupListPage extends GroupsAccess {
     var public = ""
     def saveMe(): Unit = {
       User.currentUser match {
-        case Full(u) => { //User is logIn need create group only
+        case Full(u) => {
+          //User is logIn need create group only
           newGroup.validate match {
             case Nil =>
               val groupUID = GetGroupUID(newGroup.name)
@@ -188,7 +187,8 @@ class GroupListPage extends GroupsAccess {
               xs.foreach(f => S.error(f.msg))
           }
         }
-        case Empty => { //User is new.
+        case Empty => {
+          //User is new.
           newUser.validate match {
             case Nil => {
               User.actionsAfterSuccessSignup(newUser, () => {
@@ -210,7 +210,8 @@ class GroupListPage extends GroupsAccess {
             }
             case xs => {
               S.notice("Error in create user")
-              xs.foreach(f => S.error(f.msg))}
+              xs.foreach(f => S.error(f.msg))
+            }
           }
         }
       }
@@ -225,34 +226,25 @@ class GroupListPage extends GroupsAccess {
           "name=repeatePassword" #> SHtml.onSubmit(u.password(_))
       }
       case Empty =>
-          "name=firstName" #> SHtml.onSubmit(newUser.firstName(_)) &
+        "name=firstName" #> SHtml.onSubmit(newUser.firstName(_)) &
           "name=lastName" #> SHtml.onSubmit(newUser.lastName(_)) &
           "name=email" #> SHtml.onSubmit(newUser.email(_)) &
           "name=password" #> SHtml.onSubmit(newUser.password(_)) &
           "name=repeatePassword" #> SHtml.onSubmit(repeatPassword = _)
-    })&
+    }) &
       "name=groupName" #> SHtml.onSubmit(newGroup.name(_)) &
       "name=description" #> SHtml.onSubmit(newGroup.description(_)) &
       "name=public" #> SHtml.onSubmit(public = _) &
       "name=tags_edit" #> SHtml.onSubmit(newGroup.tags(_)) &
       "type=submit" #> SHtml.onSubmitUnit(saveMe)
   }
-//  def newGroup = User.currentUser match {
-//    case Full(u) => "#add_group" #> addGroup()
-//    case Empty =>
-//      ".btn_add_user" #> NodeSeq.Empty &
-//        "#add_group" #> NodeSeq.Empty
-//  }
 
   def tabs = {
-    val tab = getTabParameter()
+    val tab = getTab()
+    val id = String.format("#%s", tab.tabId)
     User.currentUser match {
       case Full(u) => "#add_group" #> addGroup() &
-        (tab match {
-          case MyGroupsParameter => "#myGroups [class+]" #> activeClass
-          case MyOwnGroupsParameter => "#myOwnGroups [class+]" #> activeClass
-          case _ => "#all [class+]" #> activeClass
-        })
+        (id + " [class+]") #> activeClass
       case Empty =>
         "#myGroups" #> NodeSeq.Empty &
           "#myOwnGroups" #> NodeSeq.Empty &
@@ -301,4 +293,15 @@ class GroupListPage extends GroupsAccess {
     }
     return uniqueGroupName
   }
+
+  private abstract sealed class GroupTab(val header: String, val tabId: String, val getGroups: (User) => List[Group])
+
+  private case class AllTab() extends GroupTab("All Groups",
+    AllParameter,
+    u => if (u.superUser.is) Group.findAll()
+         else u.groups.toList ::: Group.findAll(By(Group.isOpen, true))
+  )
+  private case class MyGroupsTab() extends GroupTab("My Groups", MyGroupsParameter, u => u.groups.toList)
+  private case class MyOwnGroupTab() extends GroupTab("My Own Groups", MyOwnGroupsParameter, u => Group.findAll(By(Group.owner, u)))
+
 }
