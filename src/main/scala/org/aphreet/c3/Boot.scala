@@ -96,7 +96,9 @@ class Boot extends Bootable {
           Menu("group_admin", "Approve group") / "admin" / "group_admin" submenus {
             ApproveSection.menus: _*
           },
-          Menu("vocabularies", "Vocabularies") / "admin" / "vocabularies")
+          Menu("vocabularies", "Vocabularies") / "admin" / "vocabularies" submenus {
+            VocabularySection.menus: _*
+          })
       },
       Menu("notifications", "Notifications") / "notifications" >> loggedIn submenus {
         NotificationsSection.menus: _*

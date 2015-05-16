@@ -48,11 +48,12 @@ class GroupPageMessages(data: GroupPageData) extends GroupPageHelper {
   private def putCometMessender(cometActorName: String)(xml: NodeSeq): NodeSeq = {
     val actorName = "group-" + group.getId + "-messages-log-comet-actor"
 
-    <div class={ "lift:comet?type=" + cometActorName + ";name=" + actorName + ";group_id=" + group.getId + ";ul_id=main_ul_id;li_id=main_li_id;input_container_id=input_container" }>
+    <div class={
+      "lift:comet?type=" + cometActorName + ";name=" + actorName + ";group_id=" + group.getId +
+        ";ul_id=main_ul_id;li_id=main_li_id;input_container_id=input_container;ul_info=ul_info;li_info=li_info;" +
+        "comment_input_id=comment_input_container"
+    }>
       { xml }
     </div>
   }
-
-  def putCometChat(xml: NodeSeq): NodeSeq = putCometMessender("GroupChat")(xml)
-
 }
