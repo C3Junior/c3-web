@@ -1,11 +1,11 @@
 package org.aphreet.c3.snippet.approve.snippet
 
-import net.liftweb.util.BindHelpers._
-import net.liftweb.http.{ RequestVar, S }
 import net.liftweb.common.{ Failure, Full }
-import net.liftweb.util.{ PassThru, CssSel }
-import xml.NodeSeq
-import org.aphreet.c3.model.{ User, Group }
+import net.liftweb.http.{ RequestVar, S }
+import net.liftweb.util.BindHelpers._
+import net.liftweb.util.CssSel
+
+import scala.xml.NodeSeq
 
 /**
  * @author Aleksey Tkachev (mailto: imsiral1@mail.ru)
@@ -20,7 +20,8 @@ class AdminTabMenu {
   private def defaultTabs(): List[(String, AdminTab)] =
     List("users" -> UsersTab(),
       "groupApprove" -> GroupApproveTab(),
-      "categories" -> CategoriesTab())
+      "categories" -> CategoriesTab(),
+      "vocabularies" -> VocabulariesTab())
   def render: CssSel = {
     val activeTab = S.attr("active")
 
@@ -60,3 +61,4 @@ sealed abstract class AdminTab(val name: String, val path: String)
 case class GroupApproveTab() extends AdminTab("Approve Groups", "/admin/group_admin")
 case class CategoriesTab() extends AdminTab("Categories", "/admin/categories")
 case class UsersTab() extends AdminTab("Users", "/admin")
+case class VocabulariesTab() extends AdminTab("Vocabularies", "/admin/vocabularies")
