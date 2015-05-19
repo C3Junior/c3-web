@@ -20,6 +20,7 @@ import org.aphreet.c3.lib.metadata.Metadata
 import org.aphreet.c3.lib.metadata.Metadata._
 import org.aphreet.c3.loc.SuffixLoc
 import org.aphreet.c3.model.{ Group, User }
+import org.aphreet.c3.service.groups.GroupService
 import org.aphreet.c3.service.journal.EventType
 import org.aphreet.c3.snippet.LiftMessages
 import org.aphreet.c3.snippet.groups.{ AbstractGroupPageLoc, GroupPageFilesData }
@@ -496,7 +497,8 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
 
   protected def renderDirectoryLoc(d: C3Directory): CssSel = {
     object selectedResourcePaths extends RequestVar[Set[String]](Set())
-    val currentPathLink = data.group.createLink + data.currentAddress
+    val currentAddress = data.currentAddress
+    val currentPathLink = data.group.createLink + currentAddress
     def writeTools(): CssSel = {
       "#file_upload_form [action]" #> ("/upload/file/groups/" + group.getId + "/files" + data.currentAddress) &
         "#file_upload_close_btn [onclick]" #> SHtml.ajaxInvoke(() => JsCmds.Reload) &
@@ -509,10 +511,12 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
       })
     }
     val parentFolderPath = currentPathLink.substring(0, currentPathLink.dropRight(1).lastIndexOf("/"))
-    var parentResourcePath = "";
-    if (data.currentAddress != "/") {
-      parentResourcePath = data.currentAddress.substring(0, data.currentAddress.dropRight(1).lastIndexOf("/")) + "/"
-    }
+
+    val parentResourcePath =
+      if (currentAddress != "/")
+        currentAddress.substring(0, currentAddress.dropRight(1).lastIndexOf("/")) + "/"
+      else
+        ""
     val parentResource = group.getFile(parentResourcePath).openOr(null)
 
     (if (hasSuperAccess) {
@@ -542,6 +546,8 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
       } else {
         ".parentfolder [ondrop]" #> ""
       }) &
+      (if (parentResourcePath.isEmpty) ".parentfolder *" #> NodeSeq.Empty
+      else "invalid-empty-tag" #> NodeSeq.Empty) &
       ".child *" #> group.getChildren(data.currentAddress).sortBy(!_.isDirectory).map {
         resource =>
           {
@@ -688,6 +694,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
   protected def newDirectoryForm(currentDirectory: C3Directory, currentPath: String): CssSel = {
     var name = ""
     var tags = ""
+    var description = ""
 
     def createDirectory() {
       if (name.trim.isEmpty) {
@@ -696,6 +703,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
         val metadata = Map(OWNER_ID_META -> User.currentUserUnsafe.id.is.toString,
           GROUP_ID_META -> data.group.getId,
           TAGS_META -> tags.trim,
+          DESCRIPTION_META -> description.trim,
           ACL_META -> currentDirectory.metadata.get(ACL_META).getOrElse(""))
         currentDirectory.createDirectory(name.trim, metadata)
         journalServer.foreach(_ ! JournalServerEvent(User.currentUserUnsafe, group, EventType.CreateResources, currentDirectory.fullname + name.trim))
@@ -704,6 +712,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
     }
 
     "name=name" #> SHtml.onSubmit(name = _) &
+      "name=description" #> SHtml.onSubmit(description = _) &
       "name=tags" #> SHtml.onSubmit(tags = _) &
       "type=submit" #> SHtml.onSubmitUnit(createDirectory)
   }
