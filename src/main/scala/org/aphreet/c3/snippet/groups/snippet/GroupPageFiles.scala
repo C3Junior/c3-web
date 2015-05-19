@@ -24,6 +24,7 @@ import org.aphreet.c3.service.journal.EventType
 import org.aphreet.c3.snippet.LiftMessages
 import org.aphreet.c3.snippet.groups.{ AbstractGroupPageLoc, GroupPageFilesData }
 import org.aphreet.c3.snippet.groups.snippet.tags.TagForms
+import org.aphreet.c3.util.C3Exception
 import org.aphreet.c3.util.helpers._
 
 import scala.xml.{ NodeSeq, Text }
@@ -266,7 +267,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
       ".owner *" #> owner.map(_.shortName).getOrElse("Unknown") &
       ".owner [href]" #> owner.map(_.createLink) &
       ".name *" #> directory.name &
-      ".icon [src]" #> "/images/folder_classic.png" &
+      ".icon [src]" #> { if (directory.name == group.trashCanName) "/images/trash.png" else "/images/folder_classic.png" } &
       ".description_box *" #> directory.metadata.get(DESCRIPTION_META).getOrElse("") &
       ".created_date *" #> internetDateFormatter.format(directory.date)
 
@@ -472,8 +473,10 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
                   (d: String) => updateDescription(node, d))._2.cmd))
           } &
           ".delete_file_btn [onclick]" #> SHtml.ajaxInvoke(() => {
-            c3.deleteFile(node.fullname);
-            JsCmds.RedirectTo(parentNodeLink)
+            {
+              moveFileToTrashCan(node.fullname);
+              JsCmds.RedirectTo(parentNodeLink)
+            }
           }) &
           ".share_btn [onclick]" #> SHtml.ajaxInvoke(() => FileSharingHelper.shareFile(node)) &
           ".remove_public_link [onclick]" #> SHtml.ajaxInvoke(() => FileSharingHelper.disableSharing(node))
@@ -501,7 +504,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
     }
     def superAccessTools(): CssSel = {
       ".delete_selected_btn [onclick]" #> SHtml.ajaxInvoke(() => {
-        selectedResourcePaths.foreach(c3.deleteFile)
+        selectedResourcePaths.foreach(moveFileToTrashCan)
         JsCmds.RedirectTo(currentPathLink)
       })
     }
@@ -557,6 +560,36 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
       } &
       ".file-view" #> NodeSeq.Empty &
       commonForms(d)
+  }
+
+  def moveFileToTrashCan(name: String): JsCmd =
+    {
+      if (!name.contains(group.trashCanDirectory) && !name.endsWith("/" + group.trashCanName)) {
+        if (group.getFile(group.trashCanDirectory).openOr(null) == null) createTrashCan();
+        val resourceName = (name.substring(name.dropRight(1).lastIndexOf("/"), name.length));
+        FileTransferHelper.moveToTrashCan(resourceName, group, data.currentAddress)
+      } else {
+        JsCmds.Alert("Can't delete trashcan or file in it.")
+      }
+    }
+
+  def createTrashCan(): Unit = {
+    val root = c3.getFile("/").asDirectory
+    root.getChild(group.getId) match {
+      case Some(node) =>
+        val dir = node.asDirectory
+        dir.getChild("files") match {
+          case Some(node) =>
+            val files = node.asDirectory
+            val metadata = Map(OWNER_ID_META -> dir.metadata.get(OWNER_ID_META).getOrElse(User.id.is.toString),
+              GROUP_ID_META -> data.group.getId,
+              TAGS_META -> "Trash",
+              ACL_META -> dir.metadata.get(ACL_META).getOrElse(""))
+            files.createDirectory(group.trashCanName, metadata)
+          case None => throw new C3Exception("Failed to create trash can for group " + group.getId)
+        }
+      case None => throw new C3Exception("Can't find group with id " + group.getId)
+    }
   }
 
   protected def renderFileLoc(f: C3File): CssSel = {

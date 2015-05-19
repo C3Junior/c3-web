@@ -122,8 +122,16 @@ class GroupServiceImpl extends GroupService with C3Loggable {
         dir.createDirectory("files", metadataGroup)
         dir.createDirectory("messages", metadataGroup)
         dir.createDirectory("events", metadataGroup)
+
+        dir.getChild("files") match {
+          case Some(node) =>
+            val files = node.asDirectory
+            files.createDirectory("trash", metadataGroup)
+          case None => throw new C3Exception("Failed to create directory for group " + groupId)
+        }
       case None => throw new C3Exception("Failed to create directory for group " + groupId)
     }
+
   }
 
   private def removeGroupMapping(name: String) {
