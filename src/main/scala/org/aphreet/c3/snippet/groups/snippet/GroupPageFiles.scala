@@ -590,6 +590,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
             val metadata = Map(OWNER_ID_META -> dir.metadata.get(OWNER_ID_META).getOrElse(User.id.is.toString),
               GROUP_ID_META -> data.group.getId,
               TAGS_META -> "Trash",
+              DESCRIPTION_META -> "",
               ACL_META -> dir.metadata.get(ACL_META).getOrElse(""))
             files.createDirectory(group.trashCanName, metadata)
           case None => throw new C3Exception("Failed to create trash can for group " + group.getId)

@@ -126,7 +126,12 @@ class GroupServiceImpl extends GroupService with C3Loggable {
         dir.getChild("files") match {
           case Some(node) =>
             val files = node.asDirectory
-            files.createDirectory("trash", metadataGroup)
+            val trashCanMetadata = Map(OWNER_ID_META -> metadataGroup.get(OWNER_ID_META).getOrElse(User.id.is.toString),
+              GROUP_ID_META -> groupId,
+              TAGS_META -> "Trash",
+              DESCRIPTION_META -> "",
+              ACL_META -> metadataGroup.get(ACL_META).getOrElse(""))
+            files.createDirectory("trash", trashCanMetadata)
           case None => throw new C3Exception("Failed to create directory for group " + groupId)
         }
       case None => throw new C3Exception("Failed to create directory for group " + groupId)
