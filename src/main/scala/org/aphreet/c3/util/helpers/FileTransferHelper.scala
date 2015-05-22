@@ -25,9 +25,10 @@ object FileTransferHelper {
     }
   }
 
-  def moveToTrashCan(name: String, group: Group, currentAddress: String) = {
+  def moveToTrashCan(name: String, group: Group, currentAddress: String, IsAddressContainsName: Boolean) = {
     if (name != "") {
-      val movableFile = group.getFile(currentAddress + name)
+      val fileName = if (IsAddressContainsName) currentAddress else currentAddress + name;
+      val movableFile = group.getFile(fileName)
       val customDateFormatter = new SimpleDateFormat("dd_MM_yyyy_HH-mm-SS")
       movableFile.foreach {
         f =>

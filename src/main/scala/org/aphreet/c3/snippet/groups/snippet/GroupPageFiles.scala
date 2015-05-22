@@ -475,7 +475,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
           } &
           ".delete_file_btn [onclick]" #> SHtml.ajaxInvoke(() => {
             {
-              moveFileToTrashCan(node.fullname);
+              moveFileToTrashCan(node.fullname, true);
               JsCmds.RedirectTo(parentNodeLink)
             }
           }) &
@@ -506,7 +506,7 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
     }
     def superAccessTools(): CssSel = {
       ".delete_selected_btn [onclick]" #> SHtml.ajaxInvoke(() => {
-        selectedResourcePaths.foreach(moveFileToTrashCan)
+        selectedResourcePaths.foreach(moveFileToTrashCan(_, false))
         JsCmds.RedirectTo(currentPathLink)
       })
     }
@@ -568,12 +568,12 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
       commonForms(d)
   }
 
-  def moveFileToTrashCan(name: String): JsCmd =
+  def moveFileToTrashCan(name: String, IsDeletedFromFilePage: Boolean): JsCmd =
     {
       if (!name.contains(group.trashCanDirectory) && !name.endsWith("/" + group.trashCanName)) {
         if (group.getFile(group.trashCanDirectory).openOr(null) == null) createTrashCan();
         val resourceName = (name.substring(name.dropRight(1).lastIndexOf("/"), name.length));
-        FileTransferHelper.moveToTrashCan(resourceName, group, data.currentAddress)
+        FileTransferHelper.moveToTrashCan(resourceName, group, data.currentAddress, IsDeletedFromFilePage)
       } else {
         JsCmds.Alert("Can't delete trashcan or file in it.")
       }
@@ -614,7 +614,10 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
           ".data_file *" #> internetDateFormatter.format(f.date) &
           ".owner_file *" #> owner.map(_.shortName).getOrElse("Unknown") &
           ".size_file *" #> ByteCalculatorHelper.convert(f.versions.lastOption.fold("None")(_.length.toString)) &
-          commonForms(f)
+          commonForms(f) &
+          "#file_replace_form [action]" #> ("/replace/file/groups/" + group.getId + "/files" + data.currentAddress) &
+          "#file_replace_close_btn [onclick]" #> SHtml.ajaxInvoke(() => JsCmds.Reload)
+
     }
     if (hasSuperAccess || checkReadAccessResource(f)) doRenderFileLoc(true)
     else ".child_td [onclick]" #> SHtml.ajaxInvoke(() => (LiftMessages.ajaxError(S.?("access.restricted")))) &

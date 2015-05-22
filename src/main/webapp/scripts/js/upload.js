@@ -4,6 +4,11 @@
         var progress_bar = parent.children(".progress_error").children(".progress");
         progress_bar.show();
     })
+     $(".template-upload-replace").on("click",".start_upload",function(){
+            var parent = $(this).parent().parent().parent();
+            var progress_bar = parent.children(".progress_error").children(".progress");
+            progress_bar.show();
+        })
     $(".template-upload").on("keyup",".description", function(){
         var parent = $(this).parent().parent().parent();
         var start_button = parent.children(".tag_start_stop").children(".start_stop").children(".start").children();
@@ -25,15 +30,29 @@
         keyboard: true,
         show: false
     })
-//    .css({
-//        // make width n * 10 % of screen
-//        'width': function () {
-//        return ($(document).width() * .7) + 'px';
-//        },
-//        // center model
-//        'margin-left': function () {
-//        return -($(this).width() / 2);
-//        }
-//    })
-});
 
+
+    $('#file_replace_form').fileupload(
+    {
+             uploadTemplateId: 'template-upload-replace',
+             downloadTemplateId: 'template-download-replace'
+    });
+
+    $('#replace_form').modal({
+        backdrop: true,
+        keyboard: true,
+        show: false
+    })
+
+     $('.add-replace-file').change(function() {
+
+           if ((this).files.length == 1)
+                $(".fileinput-button").attr('disabled','disabled');
+           else
+                $(".fileinput-button").removeAttr('disabled')
+       });
+       
+    $('.cancel-replace').click(function() {
+        $(".fileinput-button").removeAttr('disabled')
+     });
+});
