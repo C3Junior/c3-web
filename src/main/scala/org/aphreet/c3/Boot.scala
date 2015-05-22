@@ -90,9 +90,10 @@ class Boot extends Bootable {
         UsersSection.menus: _*
       },
       Menu("admin", "Admin") / "admin" >> LocGroup("admin_menus") >> isSuperAdmin submenus {
-        List(Menu("categories", "Categories") / "admin" / "categories" submenus {
-          CategoriesSection.menus: _*
-        },
+        List(
+          Menu("categories", "Categories") / "admin" / "categories" submenus {
+            CategoriesSection.menus: _*
+          },
           Menu("group_admin", "Approve group") / "admin" / "group_admin" submenus {
             ApproveSection.menus: _*
           },

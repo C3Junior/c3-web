@@ -1,0 +1,35 @@
+<div class="lift:VocabularyPage.create">
+    <a type="button"
+       href="#new-vocabulary"
+       class="btn btn-success"
+       data-toggle="modal"
+       data-target="#new-vocabulary">
+        New Vocabulary
+    </a>
+
+    <div id="new-vocabulary" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">New vocabulary</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="new-vocabulary-form" role="form" method="POST" style="margin: 15px">
+                        <div class="form-group">
+                            <input id="new-vocabulary-name"
+                                   class="form-control"
+                                   type="text"
+                                   name="name"
+                                   placeholder="Enter Name...">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" class="btn btn-warning cancel">Отмена</button>
+                    <button type="submit" class="btn btn-success" form="new-vocabulary-form">Подтвердить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

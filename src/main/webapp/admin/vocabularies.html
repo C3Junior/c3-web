@@ -1,14 +1,18 @@
 <div class="lift:surround?with=default">
-    <div class="lift:bind-at?name=content" >
+    <div class="lift:bind-at?name=content">
         <div class="col-sm-12 col-md-12">
             <div class="row">
                 <div class="lift:UserListPage.embedTabMenu"></div>
             </div>
+
             <div class="row">
-                <div class="lift:VocabularyListPage">
-                    <h3 class="nav-header groupsHeader">Vocabularies</h3>
-                    <a href="/vocabularies/create">New Vocabulary</a>
-                    <table class="table table-striped table-condensed">
+                <div>
+                    <h3 class="nav-header ">Vocabularies</h3>
+
+                    <div data-lift="embed?what=/vocabularies/create"></div>
+                    <div data-lift="embed?what=/vocabularies/edit"></div>
+
+                    <table class="table table-striped table-condensed lift:VocabularyPage.list">
                         <thead>
                         <tr>
                             <th>Vocabulary</th>
@@ -18,12 +22,29 @@
                         <tbody>
                         <tr class="vocabularies-list">
                             <td class="vocabulary-name">Vocabulary name</td>
-                            <td class="vocabulary-actions"><a class="edit-link">Edit</a></td>
+                            <td class="vocabulary-actions">
+                                <a class="edit-link"
+                                   data-toggle="modal"
+                                   data-target="#edit-vocabulary">
+                                    Edit
+                                </a>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
+
             </div>
+
+            <script type="text/javascript">
+                function onEditClick() {
+                    var id = $(this).data('vocabulary-id');
+                    var name = $(this).closest('tr').find('td.vocabulary-name').text();
+
+                    $('#edit-vocabulary-id').val(id);
+                    $('#edit-vocabulary-name').val(name);
+                }
+            </script>
         </div>
     </div>
 </div>
