@@ -24,6 +24,7 @@
                             <td class="vocabulary-name">Vocabulary name</td>
                             <td class="vocabulary-actions">
                                 <a class="edit-link"
+                                   href="javascript:$.noop()"
                                    data-toggle="modal"
                                    data-target="#edit-vocabulary">
                                     Edit
@@ -34,17 +35,19 @@
                     </table>
                 </div>
 
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        $(".edit-link").on('click', function () {
+                            var id = $(this).data('vocabulary-id');
+                            var name = $(this).closest('tr').find('td.vocabulary-name').text();
+
+                            $('#edit-vocabulary-id').val(id);
+                            $('#edit-vocabulary-name').val(name);
+                        });
+                    });
+                </script>
+
             </div>
-
-            <script type="text/javascript">
-                function onEditClick() {
-                    var id = $(this).data('vocabulary-id');
-                    var name = $(this).closest('tr').find('td.vocabulary-name').text();
-
-                    $('#edit-vocabulary-id').val(id);
-                    $('#edit-vocabulary-name').val(name);
-                }
-            </script>
         </div>
     </div>
 </div>

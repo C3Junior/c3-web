@@ -47,11 +47,12 @@ class VocabularyPage extends AdminPageHelper {
   }
 
   private def submitEdited() = {
-    val vocabulary = Vocabulary
+    var name = ""
+    var id = ""
 
-    "name=vocabulary-id" #> SHtml.onSubmit(vocabulary.find) &
-      "name=name" #> SHtml.onSubmit(vocabulary.name(_)) &
-      "type=submit" #> SHtml.onSubmitUnit(() => save(vocabulary))
+    "name=vocabulary-id" #> SHtml.onSubmit(id = _) &
+      "name=name" #> SHtml.onSubmit(name = _) &
+      "type=submit" #> SHtml.onSubmitUnit(() => save(Vocabulary.find(id).openOrThrowException("Wrong id").name(name)))
   }
 
   private def save(vocabulary: Vocabulary) =
