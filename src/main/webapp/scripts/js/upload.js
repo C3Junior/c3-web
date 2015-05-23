@@ -1,4 +1,5 @@
  $(document).ready(function() {
+
     $(".template-upload").on("click",".start_upload",function(){
         var parent = $(this).parent().parent().parent();
         var progress_bar = parent.children(".progress_error").children(".progress");
@@ -18,12 +19,26 @@
         }
         else {start_button.hide();}
     })
-    $('#file_upload_form').fileupload(
-//     {
-//        form: "file_upload",
-//        autoUpload: false
-//    }
-    )
+
+     $('#file_upload_form').fileupload({
+         done:function (e, data) {
+             $.each(data.files, function (i, file) {
+                 console.log(file.name + " was uploaded")
+             });
+             $('#upload_form').modal("hide");
+             location.reload();
+         },
+         send: function (e, data) {
+                  var fields = $(".item-required")
+                         .find("textarea, input").serializeArray();
+
+                   $.each(fields, function(i, field) {
+                     if (!field.value)
+                       alert(field.name + ' is required');
+                       event.preventDefault();
+                    });
+         }
+     });
 
     $('#upload_form').modal({
         backdrop: true,
@@ -31,11 +46,27 @@
         show: false
     })
 
-
     $('#file_replace_form').fileupload(
     {
-             uploadTemplateId: 'template-upload-replace',
-             downloadTemplateId: 'template-download-replace'
+        done:function (e, data) {
+                     $.each(data.files, function (i, file) {
+                         console.log(file.name + " was uploaded")
+                     });
+                     $('#upload_form').modal("hide");
+                     window.location = file.url;
+         },
+         send: function (e, data) {
+                  var fields = $(".item-required")
+                         .find("textarea, input").serializeArray();
+
+                   $.each(fields, function(i, field) {
+                     if (!field.value)
+                       alert(field.name + ' is required');
+                       event.preventDefault();
+                    });
+         },
+         uploadTemplateId: 'template-upload-replace',
+         downloadTemplateId: 'template-download-replace'
     });
 
     $('#replace_form').modal({
@@ -50,9 +81,5 @@
                 $(".fileinput-button").attr('disabled','disabled');
            else
                 $(".fileinput-button").removeAttr('disabled')
-       });
-       
-    $('.cancel-replace').click(function() {
-        $(".fileinput-button").removeAttr('disabled')
      });
 });

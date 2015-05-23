@@ -113,25 +113,26 @@ object FileUpload extends RestHelper with C3Loggable{
           val pathString = filePath mkString "/"
           val oldFile = c3.getFile("/"+pathString)
           logger.info("Path to upload: " + filePath)
+          var redirectPath = "/"+pathString
+            try{
+              val ojv: List[JObject] = uploads.map { fph =>
+                val url = removeTrailingIndex(currentPath).mkString("/", "/", "/") + fph.fileName
+                redirectPath = url;
+                val fileMetadata: Map[String, String] =
+                  Map((OWNER_ID_META -> userGroupIds.userId), (GROUP_ID_META -> userGroupIds.groupId),(DESCRIPTION_META -> oldFile.metadata.get(DESCRIPTION_META).getOrElse("")),
+                    (TAGS_META -> oldFile.metadata.get(TAGS_META).getOrElse("")))
+                val group: Box[Group] = Group.findById(filePath.head)
+                val relativeFilePathString = filePath.drop(2) mkString "/"
+                FileTransferHelper.moveToTrashCan(oldFile.name, group.open_!, "/"+relativeFilePathString, true)
+                uploadToC3(fph, filePath.dropRight(1), fileMetadata)
+                ("name" -> fph.fileName) ~
+                  ("url" -> url) ~
+                  ("sizef" -> fph.length) ~
+                  ("delete_url" -> ("/delete/file" + url)) ~
+                  ("delete_type" -> "DELETE")
+              }
 
-          try{
-            val ojv: List[JObject] = uploads.map { fph =>
-              val url = removeTrailingIndex(currentPath).mkString("/", "/", "/") + fph.fileName
-              val fileMetadata: Map[String, String] =
-                Map((OWNER_ID_META -> userGroupIds.userId), (GROUP_ID_META -> userGroupIds.groupId),(DESCRIPTION_META -> oldFile.metadata.get(DESCRIPTION_META).getOrElse("")),
-                  (TAGS_META -> oldFile.metadata.get(TAGS_META).getOrElse("")))
-              val group: Box[Group] = Group.findById(filePath.head)
-              val relativeFilePathString = filePath.drop(2) mkString "/"
-              FileTransferHelper.moveToTrashCan(oldFile.name, group.open_!, "/"+relativeFilePathString, true)
-              uploadToC3(fph, filePath.dropRight(1), fileMetadata)
-              ("name" -> fph.fileName) ~
-                ("url" -> url) ~
-                ("sizef" -> fph.length) ~
-                ("delete_url" -> ("/delete/file" + url)) ~
-                ("delete_type" -> "DELETE")
-            }
-
-            val jr = JsonResponse(ojv).toResponse.asInstanceOf[InMemoryResponse]
+              val jr = JsonResponse(ojv).toResponse.asInstanceOf[InMemoryResponse]
             InMemoryResponse(jr.data, ("Content-Length", jr.data.length.toString) ::
               ("Content-Type", "text/plain") :: S.getHeaders(Nil),
               S.responseCookies, 200)
@@ -143,7 +144,7 @@ object FileUpload extends RestHelper with C3Loggable{
                 BadResponse()
             }
           }
-        }
+      }
       }
     }
     case "delete" :: "file" :: currentPath Delete req => {

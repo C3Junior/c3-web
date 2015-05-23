@@ -488,7 +488,9 @@ class GroupPageFiles(data: GroupPageFilesData) extends C3ResourceHelpers
           "#meta" #> metadataView(node, metadataUser) &
           ".share_btn [disabled]" #> "true" &
           ".remove_public_link [disabled]" #> "true" &
-          "#sharing *" #> NodeSeq.Empty
+          "#sharing *" #> NodeSeq.Empty &
+          ".replace_file_btn" #> NodeSeq.Empty
+
       }) &
       ".file_tags" #> meta.get(TAGS_META).map(_.split(TAGS_SEPARATOR).toList).getOrElse(Nil).map((tag: String) => {
         ".label *" #> tag
